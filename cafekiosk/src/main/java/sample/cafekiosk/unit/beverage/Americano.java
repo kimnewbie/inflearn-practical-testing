@@ -1,5 +1,8 @@
 package sample.cafekiosk.unit.beverage;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 public class Americano implements Beverage {
     @Override
     public String getName() {

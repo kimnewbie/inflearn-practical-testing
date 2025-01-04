@@ -1,5 +1,4 @@
-﻿package sample.cafekiosk.unit.order;
-
+package sample.cafekiosk.unit.order;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
