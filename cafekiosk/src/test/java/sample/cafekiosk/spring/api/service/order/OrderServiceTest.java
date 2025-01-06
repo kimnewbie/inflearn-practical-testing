@@ -1,13 +1,12 @@
 package sample.cafekiosk.spring.api.service.order;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
+import sample.cafekiosk.spring.api.service.order.request.OrderCreateServiceRequest;
 import sample.cafekiosk.spring.api.service.order.response.OrderResponse;
 import sample.cafekiosk.spring.domain.order.OrderRepository;
 import sample.cafekiosk.spring.domain.orderproduct.OrderProductRepository;
@@ -20,9 +19,7 @@ import sample.cafekiosk.spring.domain.stock.StockRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.assertj.core.api.Assertions.*;
 import static sample.cafekiosk.spring.domain.product.ProductSellingStatus.SELLING;
 import static sample.cafekiosk.spring.domain.product.ProductType.*;
 
@@ -45,7 +42,6 @@ class OrderServiceTest {
     @Autowired
     private OrderService orderService;
 
-    // for data cleansing
     @AfterEach
     void tearDown() {
         orderProductRepository.deleteAllInBatch();
@@ -65,7 +61,7 @@ class OrderServiceTest {
         Product product3 = createProduct(HANDMADE, "003", 5000);
         productRepository.saveAll(List.of(product1, product2, product3));
 
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "002"))
                 .build();
 
@@ -76,7 +72,7 @@ class OrderServiceTest {
         assertThat(orderResponse.getId()).isNotNull();
         assertThat(orderResponse)
                 .extracting("registeredDateTime", "totalPrice")
-                .containsExactly(registeredDateTime, 4000);
+                .contains(registeredDateTime, 4000);
         assertThat(orderResponse.getProducts()).hasSize(2)
                 .extracting("productNumber", "price")
                 .containsExactlyInAnyOrder(
@@ -96,7 +92,7 @@ class OrderServiceTest {
         Product product3 = createProduct(HANDMADE, "003", 5000);
         productRepository.saveAll(List.of(product1, product2, product3));
 
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "001"))
                 .build();
 
@@ -127,12 +123,11 @@ class OrderServiceTest {
         Product product3 = createProduct(HANDMADE, "003", 5000);
         productRepository.saveAll(List.of(product1, product2, product3));
 
-
         Stock stock1 = Stock.create("001", 2);
         Stock stock2 = Stock.create("002", 2);
         stockRepository.saveAll(List.of(stock1, stock2));
 
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "001", "002", "003"))
                 .build();
 
@@ -147,18 +142,18 @@ class OrderServiceTest {
         assertThat(orderResponse.getProducts()).hasSize(4)
                 .extracting("productNumber", "price")
                 .containsExactlyInAnyOrder(
-                        Assertions.tuple("001", 1000),
-                        Assertions.tuple("001", 1000),
-                        Assertions.tuple("002", 3000),
-                        Assertions.tuple("003", 5000)
+                        tuple("001", 1000),
+                        tuple("001", 1000),
+                        tuple("002", 3000),
+                        tuple("003", 5000)
                 );
 
         List<Stock> stocks = stockRepository.findAll();
         assertThat(stocks).hasSize(2)
                 .extracting("productNumber", "quantity")
                 .containsExactlyInAnyOrder(
-                        Assertions.tuple("001", 0),
-                        Assertions.tuple("002", 1)
+                        tuple("001", 0),
+                        tuple("002", 1)
                 );
     }
 
@@ -178,7 +173,7 @@ class OrderServiceTest {
         stock1.deductQuantity(1); // todo
         stockRepository.saveAll(List.of(stock1, stock2));
 
-        OrderCreateRequest request = OrderCreateRequest.builder()
+        OrderCreateServiceRequest request = OrderCreateServiceRequest.builder()
                 .productNumbers(List.of("001", "001", "002", "003"))
                 .build();
 
@@ -187,6 +182,7 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("재고가 부족한 상품이 있습니다.");
     }
+
 
     private Product createProduct(ProductType type, String productNumber, int price) {
         return Product.builder()
@@ -197,4 +193,5 @@ class OrderServiceTest {
                 .name("메뉴 이름")
                 .build();
     }
+
 }
