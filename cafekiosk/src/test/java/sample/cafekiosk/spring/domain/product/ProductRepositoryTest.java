@@ -1,6 +1,5 @@
 package sample.cafekiosk.spring.domain.product;
 
-import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import static sample.cafekiosk.spring.domain.product.ProductSellingStatus.*;
 import static sample.cafekiosk.spring.domain.product.ProductType.HANDMADE;
 
 @ActiveProfiles("test")
+//@SpringBootTest
 @DataJpaTest
 class ProductRepositoryTest {
 
@@ -23,7 +23,7 @@ class ProductRepositoryTest {
 
     @DisplayName("원하는 판매상태를 가진 상품들을 조회한다.")
     @Test
-    void test() {
+    void findAllBySellingStatusIn() {
         // given
         Product product1 = createProduct("001", HANDMADE, SELLING, "아메리카노", 4000);
         Product product2 = createProduct("002", HANDMADE, HOLD, "카페라떼", 4500);
@@ -100,4 +100,5 @@ class ProductRepositoryTest {
                 .price(price)
                 .build();
     }
+
 }

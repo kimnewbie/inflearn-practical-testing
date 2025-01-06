@@ -1,9 +1,9 @@
 package sample.cafekiosk.spring.api.service.order;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import sample.cafekiosk.spring.api.controller.order.request.OrderCreateRequest;
+import org.springframework.transaction.annotation.Transactional;
+import sample.cafekiosk.spring.api.service.order.request.OrderCreateServiceRequest;
 import sample.cafekiosk.spring.api.service.order.response.OrderResponse;
 import sample.cafekiosk.spring.domain.order.Order;
 import sample.cafekiosk.spring.domain.order.OrderRepository;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Transactional // for update query
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -28,8 +28,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final StockRepository stockRepository;
 
-    public OrderResponse createOrder(OrderCreateRequest request, LocalDateTime registeredDateTime) {
-        List<String> productNumbers = getStrings(request);
+    public OrderResponse createOrder(OrderCreateServiceRequest request, LocalDateTime registeredDateTime) {
+        List<String> productNumbers = request.getProductNumbers();
         List<Product> products = findProductsBy(productNumbers);
 
         deductStockQuantities(products);
@@ -37,11 +37,6 @@ public class OrderService {
         Order order = Order.create(products, registeredDateTime);
         Order savedOrder = orderRepository.save(order);
         return OrderResponse.of(savedOrder);
-    }
-
-    private static List<String> getStrings(OrderCreateRequest request) {
-        List<String> productNumbers = request.getProductNumbers();
-        return productNumbers;
     }
 
     private void deductStockQuantities(List<Product> products) {
@@ -61,11 +56,10 @@ public class OrderService {
         }
     }
 
-    // 중복허용
     private List<Product> findProductsBy(List<String> productNumbers) {
         List<Product> products = productRepository.findAllByProductNumberIn(productNumbers);
         Map<String, Product> productMap = products.stream()
-                .collect(Collectors.toMap(Product::getProductNumber, product -> product));
+                .collect(Collectors.toMap(Product::getProductNumber, p -> p));
 
         return productNumbers.stream()
                 .map(productMap::get)
@@ -89,4 +83,5 @@ public class OrderService {
         return stockProductNumbers.stream()
                 .collect(Collectors.groupingBy(p -> p, Collectors.counting()));
     }
+
 }
