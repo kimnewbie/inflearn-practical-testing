@@ -27,4 +27,5 @@ public class OrderProduct extends BaseEntity {
         this.order = order;
         this.product = product;
     }
+
 }
